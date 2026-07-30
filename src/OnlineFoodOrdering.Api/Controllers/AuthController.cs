@@ -36,4 +36,26 @@ public class AuthController : ControllerBase
         var result = await _authService.LoginAsync(request, cancellationToken);
         return result is null ? Unauthorized() : Ok(result);
     }
+
+    /// <summary>
+    /// Registers a new customer and returns a JWT token.
+    /// </summary>
+    /// <param name="request">The registration request.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The JWT token payload.</returns>
+    [HttpPost("register")]
+    [ProducesResponseType(typeof(LoginResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<LoginResponseDto>> Register([FromBody] RegisterRequestDto request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await _authService.RegisterAsync(request, cancellationToken);
+            return CreatedAtAction(nameof(Login), result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+    }
 }

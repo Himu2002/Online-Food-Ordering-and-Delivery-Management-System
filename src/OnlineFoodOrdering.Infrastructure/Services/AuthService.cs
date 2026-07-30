@@ -56,4 +56,37 @@ public class AuthService : IAuthService
             Role = user.Role
         };
     }
+
+    /// <inheritdoc />
+    public async Task<LoginResponseDto> RegisterAsync(RegisterRequestDto request, CancellationToken cancellationToken = default)
+    {
+        var existingUser = await _dbContext.Users
+            .AsNoTracking()
+            .AnyAsync(x => x.Username == request.Username, cancellationToken);
+
+        if (existingUser)
+        {
+            throw new InvalidOperationException("Username already exists.");
+        }
+
+        var user = new User
+        {
+            Username = request.Username,
+            Role = "Customer"
+        };
+
+        user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
+
+        _dbContext.Users.Add(user);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        var (token, expiresAtUtc) = _jwtTokenService.CreateToken(user.UserId, user.Username, user.Role);
+
+        return new LoginResponseDto
+        {
+            Token = token,
+            ExpiresAtUtc = expiresAtUtc,
+            Role = user.Role
+        };
+    }
 }

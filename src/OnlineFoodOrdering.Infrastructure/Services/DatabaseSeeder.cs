@@ -30,7 +30,7 @@ public class DatabaseSeeder
     /// <param name="cancellationToken">The cancellation token.</param>
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
-        await _dbContext.Database.EnsureCreatedAsync(cancellationToken);
+        await _dbContext.Database.MigrateAsync(cancellationToken);
 
         if (await _dbContext.Users.AnyAsync(cancellationToken))
         {
