@@ -24,11 +24,12 @@ public class MenuItemService : IMenuItemService
     /// <inheritdoc />
     public async Task<List<MenuItemDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await _context.MenuItems
+        var menuItems = await _context.MenuItems
             .AsNoTracking()
             .OrderBy(menuItem => menuItem.Name)
-            .Select(MapToDto)
             .ToListAsync(cancellationToken);
+
+        return menuItems.Select(MapToDto).ToList();
     }
 
     /// <inheritdoc />
